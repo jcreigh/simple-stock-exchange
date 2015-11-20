@@ -1,0 +1,6 @@
+{
+  "name": "Simple Stock Exchange",
+  "description": "A simple stock exchange ",
+  "keywords": ["python" ],
+  "addons": [ "heroku-postgresql" ]
+}
