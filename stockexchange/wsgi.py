@@ -1,5 +1,5 @@
 import requests
-from flask import Flask, jsonify, session
+from flask import Flask, jsonify, session, render_template
 
 app = Flask(__name__)
 app.secret_key = "Super secret key"
@@ -85,6 +85,9 @@ def api_portfolio():
 def api_info_symbol(symbol):
     return jsonify(**getSymbolData(symbol))
 
+@app.route("/")
+def index():
+    return render_template("index.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
