@@ -7,6 +7,7 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css" integrity="sha384-aUGj/X2zp5rLCbBxumKTCw2Z50WgIr1vs/PFN4praOTvYXWlVyh2UtNUU0KAUhAX" crossorigin="anonymous">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" integrity="sha512-K1qjQ+NcF2TYO/eI3M6v8EiNYZfA95pQumfvcVrTHtwQVDG+aHRqLi/ETn2uB+1JqwYqVG3LIvdm9lj6imS/pQ==" crossorigin="anonymous"></script>
+		<script src="static/main.js"></script>
 	</head>
 	<body>
 		<div class="container">
@@ -15,10 +16,14 @@
 					Simple Stock Exchange
 				</div>
 				<div class="col-md-2">
-					<div class="input-group">
-						<span class="input-group-addon" id="search-glyph-addon"><span class="glyphicon glyphicon-search"></span></span>
-						<input type="text" class="form-control" placeholder="Enter Symbol" aria-describedby="search-glyph-addon">
-					</div>
+					<form id="search-form">
+						<div class="input-group">
+							<div class="input-group-btn">
+								<button class="btn btn-default" type="button" id="search-input-btn"><span class="glyphicon glyphicon-search"></span></button>
+							</div>
+							<input type="text" class="form-control" id="search-input" placeholder="Enter Symbol">
+						</div>
+					</form>
 				</div>
 			</div>
 			<div class="row">

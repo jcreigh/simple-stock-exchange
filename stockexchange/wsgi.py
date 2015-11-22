@@ -9,8 +9,8 @@ def getSymbolData(symbol):
     try:
         r = requests.get("http://careers-data.benzinga.com/rest/richquote", params={"symbols": symbol})
         j = r.json()[symbol]
-        if ("message" in j):
-            out["message"] = j["message"]["message"]
+        if ("error" in j):
+            out["message"] = j["error"]["message"]
         else:
             out["name"] = j["name"]
             out["askPrice"] = j["askPrice"]
