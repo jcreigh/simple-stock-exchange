@@ -36,14 +36,17 @@ def api_buy(symbol, quantity):
         session["portfolio"].setdefault(symbol, {"quantity": 0, "lastprice": 0})
         try:
             quantity = int(quantity)
-            price = quantity * data["askPrice"]
-            if (price <= session["balance"]):
-                session["portfolio"][symbol]["quantity"] += quantity
-                session["portfolio"][symbol]["lastprice"] = data["askPrice"]
-                session["portfolio"][symbol]["name"] = data["name"]
-                session["balance"] -= price
+            if (quantity < 0):
+                out["message"] = "Invalid quantity"
             else:
-                out["message"] = "Not enough funds"
+                price = quantity * data["askPrice"]
+                if (price <= session["balance"]):
+                    session["portfolio"][symbol]["quantity"] += quantity
+                    session["portfolio"][symbol]["lastprice"] = data["askPrice"]
+                    session["portfolio"][symbol]["name"] = data["name"]
+                    session["balance"] -= price
+                else:
+                    out["message"] = "Not enough funds"
         except ValueError:
             out["message"] = "Invalid quantity"
     return jsonify(**out)
@@ -57,19 +60,22 @@ def api_sell(symbol, quantity):
     else:
         try:
             quantity = int(quantity)
-            s = session["portfolio"][symbol]
-            if (s["quantity"] >= quantity):
-                data = getSymbolData(symbol)
-                out = {"message": "OK"}
-                if (data["message"] != "OK"):
-                    out["message"] = "Symbol error: " + data["message"]
-                else:
-                    s["quantity"] -= quantity
-                    session["balance"] += data["bidPrice"] * quantity
-                    if (s["quantity"] == 0):
-                        del session["portfolio"][symbol]
+            if (quantity < 0):
+                out["message"] = "Invalid quantity"
             else:
-                out["message"] = "Not enough shares"
+                s = session["portfolio"][symbol]
+                if (s["quantity"] >= quantity):
+                    data = getSymbolData(symbol)
+                    out = {"message": "OK"}
+                    if (data["message"] != "OK"):
+                        out["message"] = "Symbol error: " + data["message"]
+                    else:
+                        s["quantity"] -= quantity
+                        session["balance"] += data["bidPrice"] * quantity
+                        if (s["quantity"] == 0):
+                            del session["portfolio"][symbol]
+                else:
+                    out["message"] = "Not enough shares"
         except ValueError:
             out["message"] = "Invalid quantity"
     return jsonify(**out)
