@@ -25,52 +25,53 @@ def initSession():
         session["portfolio"] = {}
         session["balance"] = 100000.0
 
-@app.route("/api/buy/<symbol>/<count>")
-def api_buy(symbol, count):
+@app.route("/api/buy/<symbol>/<quantity>")
+def api_buy(symbol, quantity):
     initSession()
     data = getSymbolData(symbol)
     out = {"message": "OK"}
     if (data["message"] != "OK"):
         out["message"] = "Symbol error: " + data["message"]
     else:
-        session["portfolio"].setdefault(symbol, {"count": 0, "lastprice": 0})
+        session["portfolio"].setdefault(symbol, {"quantity": 0, "lastprice": 0})
         try:
-            count = int(count)
-            price = count * data["askPrice"]
+            quantity = int(quantity)
+            price = quantity * data["askPrice"]
             if (price <= session["balance"]):
-                session["portfolio"][symbol]["count"] += count
+                session["portfolio"][symbol]["quantity"] += quantity
                 session["portfolio"][symbol]["lastprice"] = data["askPrice"]
+                session["portfolio"][symbol]["name"] = data["name"]
                 session["balance"] -= price
             else:
                 out["message"] = "Not enough funds"
         except ValueError:
-            out["message"] = "Invalid count"
+            out["message"] = "Invalid quantity"
     return jsonify(**out)
 
-@app.route("/api/sell/<symbol>/<count>")
-def api_sell(symbol, count):
+@app.route("/api/sell/<symbol>/<quantity>")
+def api_sell(symbol, quantity):
     initSession()
     out = {"message": "OK"}
     if (symbol not in session["portfolio"]):
         out["message"] = "No shares"
     else:
         try:
-            count = int(count)
+            quantity = int(quantity)
             s = session["portfolio"][symbol]
-            if (s["count"] >= count):
+            if (s["quantity"] >= quantity):
                 data = getSymbolData(symbol)
                 out = {"message": "OK"}
                 if (data["message"] != "OK"):
                     out["message"] = "Symbol error: " + data["message"]
                 else:
-                    s["count"] -= count
-                    session["balance"] += data["bidPrice"] * count
-                    if (s["count"] == 0):
+                    s["quantity"] -= quantity
+                    session["balance"] += data["bidPrice"] * quantity
+                    if (s["quantity"] == 0):
                         del session["portfolio"][symbol]
             else:
                 out["message"] = "Not enough shares"
         except ValueError:
-            out["message"] = "Invalid count"
+            out["message"] = "Invalid quantity"
     return jsonify(**out)
 
 @app.route("/api/portfolio")

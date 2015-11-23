@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html>
 	<head lang="en">
 		<title>Simple Stock Exchange</title>
@@ -10,6 +9,7 @@
 		<script src="static/main.js"></script>
 	</head>
 	<body>
+		<!-- My CSS isn't very good, so I don't think this look very great on small screens -->
 		<div class="container">
 			<div class="page-header row" style="display: flex; align-items: center;">
 				<div class="col-md-10 h1">
@@ -54,11 +54,21 @@
 				</div>
 				<div class="col-md-6">
 					<div class="panel panel-default">
-						<div class="panel-heading"><b>Portfolio</b></div>
+						<div class="panel-heading">
+							<div class="row">
+								<div class="col-md-4">
+									<b>Portfolio</b>
+								</div>
+								<div id="portfolio-heading" class="col-md-8 text-right" style="display: none">
+									<b>Cash: <span id="portfolio-heading-text">???</span></b>
+								</div>
+							</div>
+						</div>
 						<div class="panel-body">
 							<span id="portfolio-text">Loading...</span>
 							<table class="table table-striped" id="portfolio-table" style="display: none">
-								<thead><tr><th>Symbol</th><th>Company</th><th>Quantity</th><th>Price</th></tr></thead>
+								<thead><tr><th>Symbol</th><th>Company</th><th>Quantity</th><th>Price</th><th></th></tr></thead>
+								<tbody></tbody>
 							</table>
 						</div>
 					</div>
