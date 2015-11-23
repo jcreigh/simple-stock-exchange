@@ -1,4 +1,17 @@
 $(function() {
+
+	// http://stackoverflow.com/a/9318724
+	Number.prototype.formatMoney = function(decPlaces, thouSeparator, decSeparator) {
+		var n = this,
+		decPlaces = isNaN(decPlaces = Math.abs(decPlaces)) ? 2 : decPlaces,
+		decSeparator = decSeparator == undefined ? "." : decSeparator,
+		thouSeparator = thouSeparator == undefined ? "," : thouSeparator,
+		sign = n < 0 ? "-" : "",
+		i = parseInt(n = Math.abs(+n || 0).toFixed(decPlaces)) + "",
+		j = (j = i.length) > 3 ? j % 3 : 0;
+		return sign + (j ? i.substr(0, j) + thouSeparator : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thouSeparator) + (decPlaces ? decSeparator + Math.abs(n - i).toFixed(decPlaces).slice(2) : "");
+	};
+
 	account = {"balance": 0, "portfolio": []};
 
 	doBuy = function(stock, quantity) {
@@ -28,8 +41,8 @@ $(function() {
 		$.getJSON("/api/info/" + stock, function(data) {
 			if (data["message"] == "OK") {
 				$("#quote-heading-text").html(data["name"] + " (" + data["symbol"] + ")");
-				$("#quote-bid").html("$" + data["bidPrice"]);
-				$("#quote-ask").html("$" + data["askPrice"]);
+				$("#quote-bid").html("$" + data["bidPrice"].formatMoney());
+				$("#quote-ask").html("$" + data["askPrice"].formatMoney());
 				var fromPortfolio = account["portfolio"][data["symbol"]];
 				var qty = 0;
 				if (fromPortfolio) {
@@ -38,6 +51,8 @@ $(function() {
 				$("#quote-button-sell").prop("disabled", qty == 0);
 				$("#quote-input").val(0);
 				$("#quote-input").data("symbol", data["symbol"]);
+				$("#quote-input").data("askPrice", data["askPrice"]);
+				$("#quote-input").data("bidPrice", data["bidPrice"]);
 				$("#quote-owned").html(qty);
 				$("#quote-info").show();
 				$("#quote-heading").show();
@@ -56,7 +71,7 @@ $(function() {
 	loadPortfolio = function() {
 		$.getJSON("/api/portfolio", function(data) {
 			account["balance"] = data["balance"];
-			$("#portfolio-heading-text").html("$" + Math.round(data["balance"] * 100) / 100);
+			$("#portfolio-heading-text").html("$" + account["balance"].formatMoney());
 			$("#portfolio-heading").show();
 			account["portfolio"] = data["portfolio"];
 			var tableRows = $("#portfolio-table > tbody > tr");
@@ -73,7 +88,7 @@ $(function() {
 				row.append("<td>" + sym + "</td>");
 				row.append("<td>" + data["name"] + "</td>");
 				row.append("<td>" + data["quantity"] + "</td>");
-				row.append("<td>" + data["lastprice"] + "</td>");
+				row.append("<td>$" + data["lastprice"].formatMoney() + "</td>");
 				row.append("<td><button data-symbol=\"" + sym + "\" class=\"portfolio-stock-button btn btn-default btn-xs\"><span class=\"glyphicon glyphicon-eye-open\"></span> View</button></td>");
 				$("#portfolio-table > tbody").append(row);
 			};
@@ -102,8 +117,31 @@ $(function() {
 			owned = account["portfolio"][symbol]["quantity"];
 		}
 		var quantity = input.val();
-		$("#quote-button-sell").prop("disabled", quantity <= 0 || quantity > owned);
-		$("#quote-button-buy").prop("disabled", quantity <= 0);
+		if (quantity <= 0) {
+			quantity = 0;
+		}
+
+		$("#quote-buyfor").html("$" + (quantity * input.data("askPrice")).formatMoney());
+		$("#quote-buyfor").removeClass("bg-danger");
+		if (quantity == 0 || quantity * input.data("askPrice") > account["balance"]) {
+			if (quantity != 0) {
+				$("#quote-buyfor").addClass("bg-danger");
+			}
+			$("#quote-button-buy").prop("disabled", true);
+		} else {
+			$("#quote-button-buy").prop("disabled", false);
+		}
+
+		$("#quote-sellfor").html("$" + (quantity * input.data("bidPrice")).formatMoney());
+		$("#quote-sellfor").removeClass("bg-danger");
+		if (quantity == 0 || quantity > owned) {
+			if (quantity != 0) {
+				$("#quote-sellfor").addClass("bg-danger");
+			}
+			$("#quote-button-sell").prop("disabled", true);
+		} else {
+			$("#quote-button-sell").prop("disabled", false);
+		}
 	}
 
 	handleBuy = function(e) {
